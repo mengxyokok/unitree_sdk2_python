@@ -14,7 +14,12 @@ from cyclonedds.util import duration
 from cyclonedds.internal import dds_c_t, InvalidSample
 
 # for channel config
-from .channel_config import ChannelConfigAutoDetermine, ChannelConfigHasInterface
+from .channel_config import (
+    ChannelConfigAutoDetermine,
+    ChannelConfigHasAddress,
+    ChannelConfigHasInterface,
+    ChannelConfigHasInterfaceAddress,
+)
 
 # for singleton
 from ..utils.singleton import Singleton
@@ -211,6 +216,11 @@ class ChannelFactory(Singleton):
             # choose config
             if networkInterface is None:
                 config = ChannelConfigAutoDetermine
+            elif ":" in networkInterface:
+                _, interfaceAddress = networkInterface.split(":", 1)
+                config = ChannelConfigHasAddress.replace('$__IF_ADDR__$', interfaceAddress)
+            elif networkInterface.count(".") == 3:
+                config = ChannelConfigHasAddress.replace('$__IF_ADDR__$', networkInterface)
             else:
                 config = ChannelConfigHasInterface.replace('$__IF_NAME__$', networkInterface)
 
